@@ -13,9 +13,13 @@ echo  5. バラ曲線 (rose-curve.py)
 echo  6. ジュリア集合 (julia-set.py)
 echo  7. マンデルブロ集合 (mandelbrot-set.py)
 echo  8. リサージュ図形 (lissajous-curve.py)
-echo  9. 終了
+echo  9. エノン・アトラクター (henon-attractor.py)
+echo 10. レスラーのアトラクター (rossler-attractor.py)
+echo 11. ド・ジョン・アトラクター (dejong-attractor.py)
+echo 12. 相沢のアトラクター (aizawa-attractor.py)
+echo 13. 終了
 echo ========================================
-set /p choice="実行する番号を選んでください (1〜9): "
+set /p choice="実行する番号を選んでください (1〜13): "
 
 if "%choice%"=="1" (
     echo.
@@ -66,6 +70,30 @@ if "%choice%"=="8" (
     goto end
 )
 if "%choice%"=="9" (
+    echo.
+    echo [henon-attractor.py] を実行しています ...
+    py henon-attractor.py
+    goto end
+)
+if "%choice%"=="10" (
+    echo.
+    echo [rossler-attractor.py] を実行しています ...
+    py rossler-attractor.py
+    goto end
+)
+if "%choice%"=="11" (
+    echo.
+    echo [dejong-attractor.py] を実行しています ...
+    py dejong-attractor.py
+    goto end
+)
+if "%choice%"=="12" (
+    echo.
+    echo [aizawa-attractor.py] を実行しています ...
+    py aizawa-attractor.py
+    goto end
+)
+if "%choice%"=="13" (
     exit
 )
 
