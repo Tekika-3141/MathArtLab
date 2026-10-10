@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,8 +28,26 @@ try:
 except ValueError:
     N_PTS = default_pts
 
+print("\n=== 背景モードの選択 ===")
+print("1. ダーク (Dark)")
+print("2. ライト (Light)")
+print("3. 透過 (Transparent)")
+print("4. すべて生成 (Dark, Light, Transparent)")
+try:
+    bg_input = input("番号を入力してください [デフォルト: 4]: ")
+    BG_MODE = int(bg_input) if bg_input.strip() != "" else 4
+except ValueError:
+    BG_MODE = 4
+
 folder_name = "outputs/rose-curve"
+if os.path.exists(folder_name):
+    shutil.rmtree(folder_name)
 os.makedirs(folder_name, exist_ok=True)
+
+modes = []
+if BG_MODE in [1, 4]: modes.append('dark')
+if BG_MODE in [2, 4]: modes.append('light')
+if BG_MODE in [3, 4]: modes.append('transparent')
 
 theta = np.linspace(0, 20 * np.pi, N_PTS)
 r = np.cos((5 / 7) * theta)
@@ -40,47 +59,58 @@ x2, y2 = r2 * np.cos(theta), r2 * np.sin(theta)
 
 fig_size, dpi_val = (8, 8), 600
 
-total_steps = 8  # 単体2種(ダーク/ライトで4枚) + 重ね合わせ2種(ダーク/ライトで2ペア分計4枚) = 8枚
+# 単体2種(各modes) + 重ね合わせ1種(各modes) = 合計 (2 + 1) * len(modes)
+total_steps = 3 * len(modes)
 current_step = 0
 
-print(f"'{folder_name}' フォルダに画像を生成中（解像度: {N_PTS}, 太さ: {POINT_SIZE}）")
+print(f"\n'{folder_name}' フォルダをクリアし、画像を生成中（解像度: {N_PTS}, 太さ: {POINT_SIZE}）")
 print_bar(current_step, total_steps, prefix="画像生成")
 
 single_rules = [("rule1", theta, 'hsv'), ("rule2", dist, 'plasma')]
 for name, col_data, cmap_name in single_rules:
-    fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
-    ax.set_facecolor('black')
-    ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
-    ax.axis('off')
-    ax.set_aspect('equal', adjustable='box')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'rose_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
+    for mode in modes:
+        bg_col = 'black' if mode == 'dark' else ('white' if mode == 'light' else 'none')
+        is_transparent = (mode == 'transparent')
+        
+        fig, ax = plt.subplots(figsize=fig_size, facecolor=bg_col if not is_transparent else 'none')
+        if not is_transparent:
+            ax.set_facecolor(bg_col)
+        else:
+            ax.set_facecolor('none')
+            
+        ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
+        ax.axis('off')
+        ax.set_aspect('equal', adjustable='box')
+        plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        
+        filename = f'rose_{name}_{mode}.png'
+        plt.savefig(os.path.join(folder_name, filename), dpi=dpi_val, facecolor=bg_col if not is_transparent else 'none', transparent=is_transparent, edgecolor='none')
+        plt.close()
+        
+        current_step += 1
+        print_bar(current_step, total_steps, prefix="画像生成")
 
-    fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
-    ax.set_facecolor('white')
-    ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
-    ax.axis('off')
-    ax.set_aspect('equal', adjustable='box')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'rose_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
-
-for bg_col in ['black', 'white']:
-    suffix = 'dark' if bg_col == 'black' else 'light'
-    fig, ax = plt.subplots(figsize=fig_size, facecolor=bg_col)
-    ax.set_facecolor(bg_col)
+# ルール3（重ね合わせ）
+for mode in modes:
+    bg_col = 'black' if mode == 'dark' else ('white' if mode == 'light' else 'none')
+    is_transparent = (mode == 'transparent')
+    
+    fig, ax = plt.subplots(figsize=fig_size, facecolor=bg_col if not is_transparent else 'none')
+    if not is_transparent:
+        ax.set_facecolor(bg_col)
+    else:
+        ax.set_facecolor('none')
+        
     ax.scatter(x, y, c='cyan', s=POINT_SIZE, alpha=0.7, edgecolors='none')
     ax.scatter(x2, y2, c='magenta', s=POINT_SIZE, alpha=0.7, edgecolors='none')
     ax.axis('off')
     ax.set_aspect('equal', adjustable='box')
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'rose_rule3_{suffix}.png'), dpi=dpi_val, facecolor=bg_col, edgecolor='none')
+    
+    filename = f'rose_rule3_{mode}.png'
+    plt.savefig(os.path.join(folder_name, filename), dpi=dpi_val, facecolor=bg_col if not is_transparent else 'none', transparent=is_transparent, edgecolor='none')
     plt.close()
+    
     current_step += 1
     print_bar(current_step, total_steps, prefix="画像生成")
 

@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -20,8 +21,26 @@ try:
 except ValueError:
     MAX_ITER = default_iter
 
+print("\n=== 背景モードの選択 ===")
+print("1. ダーク (Dark)")
+print("2. ライト (Light)")
+print("3. 透過 (Transparent)")
+print("4. すべて生成 (Dark, Light, Transparent)")
+try:
+    bg_input = input("番号を入力してください [デフォルト: 4]: ")
+    BG_MODE = int(bg_input) if bg_input.strip() != "" else 4
+except ValueError:
+    BG_MODE = 4
+
 folder_name = "outputs/mandelbrot-set"
+if os.path.exists(folder_name):
+    shutil.rmtree(folder_name)
 os.makedirs(folder_name, exist_ok=True)
+
+modes = []
+if BG_MODE in [1, 4]: modes.append('dark')
+if BG_MODE in [2, 4]: modes.append('light')
+if BG_MODE in [3, 4]: modes.append('transparent')
 
 width, height = 1000, 1000
 xmin, xmax, ymin, ymax = -2.0, 0.5, -1.25, 1.25
@@ -46,31 +65,33 @@ configs = [
     ("rule3", img_mandel, 'twilight')
 ]
 
-total_steps = len(configs) * 2
+total_steps = len(configs) * len(modes)
 current_step = 0
 
-print(f"'{folder_name}' フォルダに画像を生成中（計算回数: {MAX_ITER}）")
+print(f"\n'{folder_name}' フォルダをクリアし、画像を生成中（計算回数: {MAX_ITER}）")
 print_bar(current_step, total_steps, prefix="画像生成")
 
 for name, img_data, cmap_name in configs:
-    fig, ax = plt.subplots(figsize=(8, 8), facecolor='black')
-    ax.set_facecolor('black')
-    ax.imshow(img_data, extent=[xmin, xmax, ymin, ymax], cmap=cmap_name, origin='lower')
-    ax.axis('off')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'mandelbrot_{name}_dark.png'), dpi=600, facecolor='black', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
-
-    fig, ax = plt.subplots(figsize=(8, 8), facecolor='white')
-    ax.set_facecolor('white')
-    ax.imshow(img_data, extent=[xmin, xmax, ymin, ymax], cmap=cmap_name + '_r', origin='lower')
-    ax.axis('off')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'mandelbrot_{name}_light.png'), dpi=600, facecolor='white', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
+    for mode in modes:
+        is_transparent = (mode == 'transparent')
+        bg_col = 'black' if mode == 'dark' else ('white' if mode == 'light' else 'none')
+        c_map = cmap_name if mode != 'light' else cmap_name + '_r'
+        
+        fig, ax = plt.subplots(figsize=(8, 8), facecolor=bg_col if not is_transparent else 'none')
+        if not is_transparent:
+            ax.set_facecolor(bg_col)
+        else:
+            ax.set_facecolor('none')
+            
+        ax.imshow(img_data, extent=[xmin, xmax, ymin, ymax], cmap=c_map, origin='lower')
+        ax.axis('off')
+        plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        
+        filename = f'mandelbrot_{name}_{mode}.png'
+        plt.savefig(os.path.join(folder_name, filename), dpi=600, facecolor=bg_col if not is_transparent else 'none', transparent=is_transparent, edgecolor='none')
+        plt.close()
+        
+        current_step += 1
+        print_bar(current_step, total_steps, prefix="画像生成")
 
 print("Mandelbrot Set 完了")

@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,8 +28,26 @@ try:
 except ValueError:
     MAX_VAL = default_max
 
+print("\n=== 背景モードの選択 ===")
+print("1. ダーク (Dark)")
+print("2. ライト (Light)")
+print("3. 透過 (Transparent)")
+print("4. すべて生成 (Dark, Light, Transparent)")
+try:
+    bg_input = input("番号を入力してください [デフォルト: 4]: ")
+    BG_MODE = int(bg_input) if bg_input.strip() != "" else 4
+except ValueError:
+    BG_MODE = 4
+
 folder_name = "outputs/goldbach-comet"
+if os.path.exists(folder_name):
+    shutil.rmtree(folder_name)
 os.makedirs(folder_name, exist_ok=True)
+
+modes = []
+if BG_MODE in [1, 4]: modes.append('dark')
+if BG_MODE in [2, 4]: modes.append('light')
+if BG_MODE in [3, 4]: modes.append('transparent')
 
 def sieve_of_eratosthenes(max_n):
     sieve = np.ones(max_n + 1, dtype=bool)
@@ -81,31 +100,38 @@ rules = [
     ("rule5", np.array(prime_factors_count), 'twilight')
 ]
 
-total_steps = len(rules) * 2
+total_steps = len(rules) * len(modes)
 current_step = 0
 
-print(f"'{folder_name}' フォルダに画像を生成中（最大値: {MAX_VAL}, 太さ: {POINT_SIZE}）")
+print(f"\n'{folder_name}' フォルダをクリアし、画像を生成中（最大値: {MAX_VAL}, 太さ: {POINT_SIZE}）")
 print_bar(current_step, total_steps, prefix="画像生成")
 
 for name, col_data, cmap_name in rules:
-    fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
-    ax.set_facecolor('black')
-    ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
-    ax.axis('off')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'goldbach_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
+    for mode in modes:
+        if mode == 'dark':
+            fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
+            ax.set_facecolor('black')
+            ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
+            ax.axis('off')
+            plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            plt.savefig(os.path.join(folder_name, f'goldbach_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
+        elif mode == 'light':
+            fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
+            ax.set_facecolor('white')
+            ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
+            ax.axis('off')
+            plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            plt.savefig(os.path.join(folder_name, f'goldbach_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
+        elif mode == 'transparent':
+            fig, ax = plt.subplots(figsize=fig_size, facecolor='none')
+            ax.set_facecolor('none')
+            ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
+            ax.axis('off')
+            plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+            plt.savefig(os.path.join(folder_name, f'goldbach_{name}_transparent.png'), dpi=dpi_val, transparent=True, edgecolor='none')
 
-    fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
-    ax.set_facecolor('white')
-    ax.scatter(x, y, c=col_data, cmap=cmap_name, s=POINT_SIZE, edgecolors='none')
-    ax.axis('off')
-    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
-    plt.savefig(os.path.join(folder_name, f'goldbach_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
-    plt.close()
-    current_step += 1
-    print_bar(current_step, total_steps, prefix="画像生成")
+        plt.close()
+        current_step += 1
+        print_bar(current_step, total_steps, prefix="画像生成")
 
 print("Goldbach Comet 完了")
