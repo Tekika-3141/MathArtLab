@@ -19,7 +19,7 @@ except ValueError:
     N_STEPS = default_steps
     print(f"無効な値のため、デフォルト値 ({default_steps}) を適用します。")
 
-folder_name = "lorenz-attractor"
+folder_name = "outputs/lorenz-attractor"
 os.makedirs(folder_name, exist_ok=True)
 
 dt = 0.01

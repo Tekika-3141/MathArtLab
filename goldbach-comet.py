@@ -19,7 +19,7 @@ except ValueError:
     MAX_VAL = default_max
     print(f"無効な値のため、デフォルト値 ({default_max}) を適用します。")
 
-folder_name = "goldbach-comet"
+folder_name = "outputs/goldbach-comet"
 os.makedirs(folder_name, exist_ok=True)
 
 def sieve_of_eratosthenes(max_n):

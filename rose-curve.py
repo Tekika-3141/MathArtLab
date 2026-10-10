@@ -19,7 +19,7 @@ except ValueError:
     N_PTS = default_pts
     print(f"無効な値のため、デフォルト値 ({default_pts}) を適用します。")
 
-folder_name = "rose-curve"
+folder_name = "outputs/rose-curve"
 os.makedirs(folder_name, exist_ok=True)
 
 theta = np.linspace(0, 20 * np.pi, N_PTS)

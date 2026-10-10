@@ -19,7 +19,7 @@ except ValueError:
     N_GEN = default_n
     print(f"無効な値のため、デフォルト値 ({default_n}) を適用します。")
 
-folder_name = "dragon-curve"
+folder_name = "outputs/dragon-curve"
 os.makedirs(folder_name, exist_ok=True)
 
 def get_dragon(n):

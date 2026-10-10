@@ -11,7 +11,7 @@ except ValueError:
     MAX_ITER = default_iter
     print(f"無効な値のため、デフォルト値 ({default_iter}) を適用します。")
 
-folder_name = "julia-set"
+folder_name = "outputs/julia-set"
 os.makedirs(folder_name, exist_ok=True)
 
 width, height = 1000, 1000
@@ -41,7 +41,6 @@ configs = [
 print(f"'{folder_name}' フォルダに計6枚の画像を生成中（計算回数: {MAX_ITER}）...\n")
 
 for name, img_data, cmap_name in configs:
-    # 黒背景 (Dark)
     fig, ax = plt.subplots(figsize=(8, 8), facecolor='black')
     ax.set_facecolor('black')
     ax.imshow(img_data, extent=[xmin, xmax, ymin, ymax], cmap=cmap_name, origin='lower')
@@ -50,7 +49,6 @@ for name, img_data, cmap_name in configs:
     plt.savefig(os.path.join(folder_name, f'julia_{name}_dark.png'), dpi=600, facecolor='black', edgecolor='none')
     plt.close()
 
-    # 白背景 (Light)
     fig, ax = plt.subplots(figsize=(8, 8), facecolor='white')
     ax.set_facecolor('white')
     ax.imshow(img_data, extent=[xmin, xmax, ymin, ymax], cmap=cmap_name + '_r', origin='lower')

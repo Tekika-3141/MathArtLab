@@ -19,7 +19,7 @@ except ValueError:
     N_POINTS = default_points
     print(f"無効な値のため、デフォルト値 ({default_points}) を適用します。")
 
-folder_name = "clifford-attractor"
+folder_name = "outputs/clifford-attractor"
 os.makedirs(folder_name, exist_ok=True)
 
 x, y = np.zeros(N_POINTS), np.zeros(N_POINTS)
