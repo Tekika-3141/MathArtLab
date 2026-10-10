@@ -1,6 +1,16 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
+
+def print_bar(iteration, total, prefix='進捗', length=25):
+    filled = int(length * iteration // total)
+    bar = '#' * filled + '-' * (length - filled)
+    percent = int(100 * iteration / total)
+    sys.stdout.write(f'\r{prefix} |{bar}| {percent}% ({iteration}/{total})')
+    sys.stdout.flush()
+    if iteration == total:
+        print()
 
 print("=== ゴールドバッハ彗星の設定 ===")
 default_size = 1.2
@@ -10,14 +20,12 @@ try:
     POINT_SIZE = float(s_input) if s_input.strip() != "" else default_size
 except ValueError:
     POINT_SIZE = default_size
-    print(f"無効な値のため、デフォルト値 ({default_size}) を適用します。")
 
 try:
     m_input = input(f"検証する偶数の最大値を入力してください [デフォルト: {default_max}]: ")
     MAX_VAL = int(m_input) if m_input.strip() != "" else default_max
 except ValueError:
     MAX_VAL = default_max
-    print(f"無効な値のため、デフォルト値 ({default_max}) を適用します。")
 
 folder_name = "outputs/goldbach-comet"
 os.makedirs(folder_name, exist_ok=True)
@@ -73,7 +81,11 @@ rules = [
     ("rule5", np.array(prime_factors_count), 'twilight')
 ]
 
-print(f"'{folder_name}' フォルダに計10枚の画像を生成中（最大値: {MAX_VAL}, 太さ: {POINT_SIZE}）...\n")
+total_steps = len(rules) * 2
+current_step = 0
+
+print(f"'{folder_name}' フォルダに画像を生成中（最大値: {MAX_VAL}, 太さ: {POINT_SIZE}）")
+print_bar(current_step, total_steps, prefix="画像生成")
 
 for name, col_data, cmap_name in rules:
     fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
@@ -83,6 +95,8 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'goldbach_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
     fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
     ax.set_facecolor('white')
@@ -91,5 +105,7 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'goldbach_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
 print("Goldbach Comet 完了")

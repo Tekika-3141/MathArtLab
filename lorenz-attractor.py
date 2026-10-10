@@ -1,6 +1,16 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
+
+def print_bar(iteration, total, prefix='進捗', length=25):
+    filled = int(length * iteration // total)
+    bar = '#' * filled + '-' * (length - filled)
+    percent = int(100 * iteration / total)
+    sys.stdout.write(f'\r{prefix} |{bar}| {percent}% ({iteration}/{total})')
+    sys.stdout.flush()
+    if iteration == total:
+        print()
 
 print("=== ローレンツのアトラクターの設定 ===")
 default_size = 0.3
@@ -10,14 +20,12 @@ try:
     POINT_SIZE = float(s_input) if s_input.strip() != "" else default_size
 except ValueError:
     POINT_SIZE = default_size
-    print(f"無効な値のため、デフォルト値 ({default_size}) を適用します。")
 
 try:
     st_input = input(f"シミュレーションのステップ数を入力してください [デフォルト: {default_steps}]: ")
     N_STEPS = int(st_input) if st_input.strip() != "" else default_steps
 except ValueError:
     N_STEPS = default_steps
-    print(f"無効な値のため、デフォルト値 ({default_steps}) を適用します。")
 
 folder_name = "outputs/lorenz-attractor"
 os.makedirs(folder_name, exist_ok=True)
@@ -40,7 +48,11 @@ speeds = np.sqrt(np.gradient(xs)**2 + np.gradient(zs)**2)
 fig_size, dpi_val = (8, 8), 600
 rules = [("rule1", ys, 'viridis'), ("rule2", steps, 'plasma'), ("rule3", speeds, 'inferno')]
 
-print(f"'{folder_name}' フォルダに計6枚の画像を生成中（ステップ数: {N_STEPS}, 太さ: {POINT_SIZE}）...\n")
+total_steps = len(rules) * 2
+current_step = 0
+
+print(f"'{folder_name}' フォルダに画像を生成中（ステップ数: {N_STEPS}, 太さ: {POINT_SIZE}）")
+print_bar(current_step, total_steps, prefix="画像生成")
 
 for name, col_data, cmap_name in rules:
     fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
@@ -51,6 +63,8 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'lorenz_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
     fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
     ax.set_facecolor('white')
@@ -60,5 +74,7 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'lorenz_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
 print("Lorenz Attractor 完了")

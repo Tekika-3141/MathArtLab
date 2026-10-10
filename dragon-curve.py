@@ -1,6 +1,16 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
+
+def print_bar(iteration, total, prefix='進捗', length=25):
+    filled = int(length * iteration // total)
+    bar = '#' * filled + '-' * (length - filled)
+    percent = int(100 * iteration / total)
+    sys.stdout.write(f'\r{prefix} |{bar}| {percent}% ({iteration}/{total})')
+    sys.stdout.flush()
+    if iteration == total:
+        print()
 
 print("=== ドラゴン曲線の設定 ===")
 default_size = 0.5
@@ -10,14 +20,12 @@ try:
     POINT_SIZE = float(s_input) if s_input.strip() != "" else default_size
 except ValueError:
     POINT_SIZE = default_size
-    print(f"無効な値のため、デフォルト値 ({default_size}) を適用します。")
 
 try:
     n_input = input(f"世代数（折れ曲がり回数）を入力してください [デフォルト: {default_n}]: ")
     N_GEN = int(n_input) if n_input.strip() != "" else default_n
 except ValueError:
     N_GEN = default_n
-    print(f"無効な値のため、デフォルト値 ({default_n}) を適用します。")
 
 folder_name = "outputs/dragon-curve"
 os.makedirs(folder_name, exist_ok=True)
@@ -60,7 +68,11 @@ rules = [
     ("rule5", distances, 'viridis')
 ]
 
-print(f"'{folder_name}' フォルダに計10枚の画像を生成中（世代数: {N_GEN}, 太さ: {POINT_SIZE}）...\n")
+total_steps = len(rules) * 2
+current_step = 0
+
+print(f"'{folder_name}' フォルダに画像を生成中（世代数: {N_GEN}, 太さ: {POINT_SIZE}）")
+print_bar(current_step, total_steps, prefix="画像生成")
 
 for name, col_data, cmap_name in rules:
     fig, ax = plt.subplots(figsize=fig_size, facecolor='black')
@@ -71,6 +83,8 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'dragon_{name}_dark.png'), dpi=dpi_val, facecolor='black', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
     fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
     ax.set_facecolor('white')
@@ -80,5 +94,7 @@ for name, col_data, cmap_name in rules:
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
     plt.savefig(os.path.join(folder_name, f'dragon_{name}_light.png'), dpi=dpi_val, facecolor='white', edgecolor='none')
     plt.close()
+    current_step += 1
+    print_bar(current_step, total_steps, prefix="画像生成")
 
 print("Dragon Curve 完了")
