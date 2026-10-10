@@ -1,0 +1,74 @@
+@echo off
+chcp 65001 >nul
+
+:menu
+cls
+echo ==================================================
+echo         数学アート生成プログラム ランチャー
+echo ==================================================
+echo   1. ドラゴン曲線 (dragon-curve.py)
+echo   2. ゴールドバッハ彗星 (goldbach-comet.py)
+echo   3. クリフォードのアトラクター (clifford-attractor.py)
+echo   4. ローレンツのアトラクター (lorenz-attractor.py)
+echo   5. バラ曲線 (rose-curve.py)
+echo   6. ジュリア集合 (julia-set.py)
+echo   7. 終了
+echo ==================================================
+set /p choice="実行する番号を選んでください (1〜7): "
+
+if "%choice%"=="1" (
+    echo.
+    echo [dragon-curve.py] を実行しています...
+    py dragon-curve.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="2" (
+    echo.
+    echo [goldbach-comet.py] を実行しています...
+    py goldbach-comet.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="3" (
+    echo.
+    echo [clifford-attractor.py] を実行しています...
+    py clifford-attractor.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="4" (
+    echo.
+    echo [lorenz-attractor.py] を実行しています...
+    py lorenz-attractor.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="5" (
+    echo.
+    echo [rose-curve.py] を実行しています...
+    py rose-curve.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="6" (
+    echo.
+    echo [julia-set.py] を実行しています...
+    py julia-set.py
+    echo.
+    pause
+    goto menu
+)
+if "%choice%"=="7" (
+    exit
+)
+
+echo.
+echo 無効な番号です。1から7の間で選んでください。
+pause
+goto menu
